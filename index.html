@@ -1,0 +1,1194 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>⛽ Automated Petrol Record - AI Powered</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 32px;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
+
+      .ai-badge {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 12px;
+        display: inline-block;
+        margin-bottom: 20px;
+      }
+
+      .upload-section {
+        background: #f8f9ff;
+        border: 2px dashed #667eea;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      .upload-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .upload-box {
+        background: white;
+        border: 2px dashed #ddd;
+        border-radius: 12px;
+        padding: 20px;
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+      }
+
+      .upload-box:hover {
+        border-color: #667eea;
+        background: #f8f9ff;
+      }
+
+      .upload-box.has-image {
+        border-color: #28a745;
+        border-style: solid;
+      }
+
+      .upload-box input[type="file"] {
+        display: none;
+      }
+
+      .upload-icon {
+        font-size: 40px;
+        margin-bottom: 10px;
+      }
+
+      .upload-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+      }
+
+      .upload-hint {
+        font-size: 11px;
+        color: #666;
+      }
+
+      .preview-img {
+        max-width: 100%;
+        max-height: 150px;
+        margin-top: 10px;
+        border-radius: 8px;
+      }
+
+      .process-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: all 0.3s;
+      }
+
+      .process-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+      }
+
+      .process-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 15px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .form-section {
+        display: none;
+        margin-top: 30px;
+      }
+
+      .form-section.visible {
+        display: block;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .vehicle-no-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .vehicle-no-row input {
+        flex: 1;
+        min-width: 0;
+      }
+      .get-last-record-btn {
+        flex-shrink: 0;
+        padding: 8px 12px;
+        font-size: 12px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .get-last-record-btn:hover {
+        background: #5568d3;
+      }
+      .get-last-record-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 500;
+        font-size: 14px;
+      }
+
+      .required {
+        color: #e74c3c;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      input[type="datetime-local"],
+      select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s;
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .ai-filled {
+        background-color: #e8f5e9 !important;
+        border-color: #28a745 !important;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+      .row.row-one-optional .form-group:only-child {
+        grid-column: 1 / -1;
+      }
+
+      .message {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: none;
+      }
+
+      .message.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .message.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .error-detail {
+        margin-top: 8px;
+        padding: 10px;
+        background: rgba(0,0,0,0.05);
+        border-radius: 6px;
+        font-size: 13px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .error-action {
+        margin-top: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #5a4d6b;
+      }
+      .message.error .retry-hint {
+        margin-top: 8px;
+        font-size: 12px;
+        opacity: 0.9;
+      }
+
+      .merged-preview {
+        margin-top: 20px;
+        text-align: center;
+      }
+
+      .merged-preview img {
+        max-width: 100%;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      #mergedCanvas {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: block;
+        margin: 0 auto;
+      }
+
+      @media (max-width: 768px) {
+        .upload-grid {
+          grid-template-columns: 1fr;
+        }
+        .row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>⛽ Automated Petrol Record</h1>
+      <p class="subtitle">
+        <span class="ai-badge">🤖 AI Powered OCR</span>
+      </p>
+
+      <div id="message" class="message"></div>
+      <div id="errorDetail" class="message error" style="display: none;">
+        <strong>What went wrong?</strong>
+        <div id="errorDetailText" class="error-detail"></div>
+        <div id="errorAction" class="error-action"></div>
+        <div class="retry-hint">You can fix the issue and try again.</div>
+      </div>
+
+      <!-- Image Upload Section -->
+      <div class="upload-section">
+        <h2 style="margin-bottom: 10px">📸 Upload 3 Images</h2>
+        <p style="color: #666; font-size: 14px; margin-bottom: 20px">
+          Upload receipt, bike odometer, and pump display. AI will extract all
+          data automatically.
+        </p>
+
+        <div class="upload-grid">
+          <!-- Receipt (First) -->
+          <div
+            class="upload-box"
+            onclick="document.getElementById('receipt').click()"
+          >
+            <input
+              type="file"
+              id="receipt"
+              accept="image/*"
+              onchange="handleImageUpload(this, 'receipt')"
+            />
+            <div class="upload-icon">🧾</div>
+            <div class="upload-label">Receipt</div>
+            <div class="upload-hint">Date, Time, Bill</div>
+            <img
+              id="preview-receipt"
+              class="preview-img"
+              style="display: none"
+            />
+          </div>
+
+          <!-- Bike Odometer (Second) -->
+          <div
+            class="upload-box"
+            onclick="document.getElementById('odometer').click()"
+          >
+            <input
+              type="file"
+              id="odometer"
+              accept="image/*"
+              onchange="handleImageUpload(this, 'odometer')"
+            />
+            <div class="upload-icon">🏍️</div>
+            <div class="upload-label">Bike Odometer</div>
+            <div class="upload-hint">KM reading</div>
+            <img
+              id="preview-odometer"
+              class="preview-img"
+              style="display: none"
+            />
+          </div>
+
+          <!-- Pump Display (Third) -->
+          <div
+            class="upload-box"
+            onclick="document.getElementById('pump').click()"
+          >
+            <input
+              type="file"
+              id="pump"
+              accept="image/*"
+              onchange="handleImageUpload(this, 'pump')"
+            />
+            <div class="upload-icon">⛽</div>
+            <div class="upload-label">Pump Display</div>
+            <div class="upload-hint">Rate, Volume, Density</div>
+            <img id="preview-pump" class="preview-img" style="display: none" />
+          </div>
+        </div>
+
+        <button
+          class="process-btn"
+          id="processBtn"
+          onclick="processImagesWithAI()"
+          disabled
+        >
+          🤖 Process with AI
+        </button>
+
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <p>
+            AI is analyzing your images...<br /><small
+              >Extracting odometer, rate, volume, amount, density,
+              location...</small
+            >
+          </p>
+        </div>
+      </div>
+
+      <!-- Form Section (Hidden until AI processes) -->
+      <div class="form-section" id="formSection">
+        <h2 style="margin-bottom: 20px">📝 Review & Submit</h2>
+        <p style="color: #28a745; margin-bottom: 20px">
+          ✅ Data extracted by AI. Please review and make any corrections.
+        </p>
+
+        <form id="petrolForm">
+          <div class="row">
+            <div class="form-group">
+              <label for="date"
+                >Date & Time <span class="required">*</span></label
+              >
+              <input
+                type="datetime-local"
+                id="date"
+                name="date"
+                step="1"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="rate"
+                >Rate per Litre (₹/L) <span class="required">*</span></label
+              >
+              <input type="number" id="rate" name="rate" step="0.01" required />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="form-group">
+              <label for="amount"
+                >Amount Paid (₹) <span class="required">*</span></label
+              >
+              <input
+                type="number"
+                id="amount"
+                name="amount"
+                step="0.01"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="volume"
+                >Volume (Litres) <span class="required">*</span></label
+              >
+              <input
+                type="number"
+                id="volume"
+                name="volume"
+                step="0.01"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="form-group">
+              <label for="kilometer"
+                >Odometer Reading (KM) <span class="required">*</span></label
+              >
+              <input type="number" id="kilometer" name="kilometer" required />
+            </div>
+            <div class="form-group">
+              <label for="density">Density (Kg/m³)</label>
+              <input type="number" id="density" name="density" step="0.1" />
+            </div>
+          </div>
+
+          <input type="hidden" id="lastKilometer" name="lastKilometer" value="" />
+          <input type="hidden" id="kmRun" name="kmRun" value="" />
+
+          <div class="row">
+            <div class="form-group">
+              <label for="vehicleNo">Vehicle Number</label>
+              <div class="vehicle-no-row">
+                <input type="text" id="vehicleNo" name="vehicleNo" />
+                <button type="button" id="getLastRecordBtn" class="get-last-record-btn" title="Fetch last record's odometer for this vehicle (uses month from URL or form date)">Get the last record</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="petrolBunk"
+                >Petrol Bunk <span class="required">*</span></label
+              >
+              <select id="petrolBunk" name="petrolBunk" required>
+                <option value="">Select</option>
+                <option value="Bharat Petroleum">Bharat Petroleum</option>
+                <option value="HP">HP</option>
+                <option value="Shell">Shell</option>
+                <option value="Indian Oil">Indian Oil</option>
+                <option value="Reliance">Reliance</option>
+                <option value="Nayara">Nayara</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="form-group">
+              <label for="location">Location</label>
+              <input type="text" id="location" name="location" />
+            </div>
+            <div class="form-group">
+              <label for="petrolType"
+                >Petrol Type <span class="required">*</span></label
+              >
+              <select id="petrolType" name="petrolType" required>
+                <option value="">Select</option>
+                <option value="Normal">Normal</option>
+                <option value="Power Petrol">Power Petrol</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row row-one-optional">
+            <div class="form-group">
+              <label for="oilChange">Action</label>
+              <select id="oilChange" name="oilChange">
+                <option value="None">None</option>
+                <option value="Air">Air</option>
+                <option value="Oil">Oil</option>
+                <option value="Both">Both (Oil & Air)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="merged-preview" id="mergedPreview" style="display: none">
+            <h3>Merged Image (Horizontal Layout - WebP)</h3>
+            <canvas id="mergedCanvas"></canvas>
+            <br />
+            <button
+              type="button"
+              onclick="downloadMergedImage()"
+              style="
+                margin-top: 15px;
+                padding: 10px 20px;
+                background: #28a745;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+              "
+            >
+              📥 Download Merged Image (.webp)
+            </button>
+          </div>
+
+          <button type="submit" class="process-btn" style="margin-top: 20px">
+            📤 Submit to Google Sheets
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // Configuration - secrets now live in Cloudflare environment variables.
+      // The browser calls our own /api/* proxies, which add the secret keys
+      // server-side before forwarding to Google Apps Script / OpenRouter.
+      const SCRIPT_URL = "/api/sheet";
+      const OPENROUTER_PROXY_URL = "/api/ocr";
+      const LLM_MODEL = "google/gemini-2.5-flash";
+
+      let uploadedImages = {
+        receipt: null,
+        odometer: null,
+        pump: null,
+      };
+
+      function handleImageUpload(input, type) {
+        if (input.files && input.files[0]) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            uploadedImages[type] = e.target.result;
+            const preview = document.getElementById(`preview-${type}`);
+            preview.src = e.target.result;
+            preview.style.display = "block";
+            input.parentElement.classList.add("has-image");
+            checkAllImagesUploaded();
+          };
+          reader.readAsDataURL(input.files[0]);
+        }
+      }
+
+      function checkAllImagesUploaded() {
+        const allUploaded =
+          uploadedImages.receipt &&
+          uploadedImages.odometer &&
+          uploadedImages.pump;
+        document.getElementById("processBtn").disabled = !allUploaded;
+      }
+
+
+      async function processImagesWithAI() {
+        document.getElementById("loading").style.display = "block";
+        document.getElementById("processBtn").disabled = true;
+
+        hideErrorDetail();
+        try {
+          const extractedData = await extractDataFromImages();
+
+          if (extractedData) {
+            populateForm(extractedData);
+            createMergedImage();
+            document.getElementById("formSection").classList.add("visible");
+            document.getElementById("loading").style.display = "none";
+            showMessage(
+              "✅ AI successfully extracted data! Review and submit.",
+              "success",
+            );
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          if (error.userMessage && error.userAction) {
+            showErrorDetail(error.userMessage, error.userAction);
+          } else {
+            showErrorDetail(
+              "AI processing failed: " + (error.message || "Unknown error"),
+              "Check the console for details, then try again.",
+            );
+          }
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("processBtn").disabled = false;
+        }
+      }
+
+      async function extractDataFromImages() {
+        const prompt = `You are analyzing THREE images from a petrol/fuel purchase in this EXACT ORDER:
+
+IMAGE 1 (Receipt): Extract date, time, location, station name, Rate/Ltr, Volume(Ltr), Amount(Rs), Product type
+IMAGE 2 (Bike Odometer/Speedometer): Extract the kilometer reading from the digital display (6-digit number)
+IMAGE 3 (Pump Display): Extract Amount(₹), Volume(L), Rate(₹/L), and DENSITY (Kg/m³) shown on the display
+
+CRITICAL INSTRUCTIONS FOR DENSITY:
+- Look carefully at the pump display for a separate "Density" meter/display showing Kg/m³ unit
+- The density value is typically shown in a smaller display on the right side
+- Density is usually in the range of 730-770 Kg/m³
+- If you see a 4-digit number with Kg/m³ label, that is the DENSITY (e.g., 748.4)
+
+EXTRACTION REQUIREMENTS:
+1. DENSITY: Extract the exact number from "Density Kg/m³" display on pump (e.g., 748.4)
+2. RATE: Extract rate per liter from pump display in ₹/L (e.g., 101.12)
+3. VOLUME: Extract volume in liters from pump display (e.g., 4.60)
+4. AMOUNT: Extract total amount from pump display in rupees (e.g., 465.15)
+5. KILOMETER: Extract odometer reading from bike dashboard - look for the main KM reading (e.g., 337555)
+6. DATE/TIME: Extract from receipt in ISO format YYYY-MM-DDTHH:MM (e.g., 2026-01-23T16:27)
+7. LOCATION: Extract city/area name from receipt header (e.g., THIRUVALLUR)
+8. PETROL STATION: Match to one of: Bharat Petroleum, HP, Shell, Indian Oil, Reliance, Nayara
+9. PRODUCT TYPE: Check receipt for product field - if "EBMS" or similar code, determine Normal or Power Petrol
+
+CRITICAL: Return ONLY this JSON structure with exact numerical values:
+{
+  "date": "YYYY-MM-DDTHH:mm:ss",
+  "kilometer": number,
+  "amount": number,
+  "volume": number,
+  "rate": number,
+  "density": number,
+  "petrolBunk": "exact station name",
+  "location": "city/area",
+  "petrolType": "Normal or Power Petrol",
+  "vehicleNo": "if visible on receipt VechNo field"
+}
+
+VALIDATION:
+- ALL numeric fields MUST be present and accurate
+- Density MUST be extracted from the pump display's density meter
+- If density is not clearly visible, estimate based on typical petrol density (745-755)
+- Return ONLY valid JSON without markdown code blocks or explanations`;
+
+        const response = await fetch(
+          OPENROUTER_PROXY_URL,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: LLM_MODEL,
+              messages: [
+                {
+                  role: "user",
+                  content: [
+                    { type: "text", text: prompt },
+                    {
+                      type: "image_url",
+                      image_url: { url: uploadedImages.receipt },
+                    },
+                    {
+                      type: "image_url",
+                      image_url: { url: uploadedImages.odometer },
+                    },
+                    {
+                      type: "image_url",
+                      image_url: { url: uploadedImages.pump },
+                    },
+                  ],
+                },
+              ],
+            }),
+          },
+        );
+
+        const raw = await response.text();
+        let data;
+        try {
+          data = raw ? JSON.parse(raw) : {};
+        } catch (_) {
+          if (!response.ok) {
+            const err = new Error("Invalid error response from API");
+            err.userMessage = "Request failed (status " + response.status + "). Response: " + (raw.slice(0, 300) || "empty");
+            err.userAction = "Check your API key and try again.";
+            throw err;
+          }
+          const err = new Error("Invalid response from API");
+          err.userMessage = "The API returned invalid data (not JSON)." + (raw ? " " + raw.slice(0, 200) : "");
+          err.userAction = "Try again. If it persists, the model or endpoint may be misconfigured.";
+          throw err;
+        }
+
+        if (!response.ok) {
+          const info = getOpenRouterErrorInfo(response.status, data);
+          const err = new Error(info.message);
+          err.userMessage = info.message;
+          err.userAction = info.action;
+          throw err;
+        }
+
+        console.log("AI Response:", data);
+        const choices = data.choices;
+        if (!choices || !choices.length || !choices[0].message) {
+          const err = new Error("No content in AI response");
+          err.userMessage = "The AI returned an empty or invalid response.";
+          err.userAction = "Try again or use different images.";
+          throw err;
+        }
+
+        const content = choices[0].message.content;
+        if (typeof content !== "string") {
+          const err = new Error("Invalid content type");
+          err.userMessage = "The AI response format was unexpected.";
+          err.userAction = "Try again.";
+          throw err;
+        }
+
+        // Extract JSON from response (handle if wrapped in markdown)
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            const extractedData = JSON.parse(jsonMatch[0]);
+            console.log("Extracted Data:", extractedData);
+            return extractedData;
+          } catch (parseErr) {
+            const err = new Error("Invalid JSON from AI");
+            err.userMessage = "The AI could not return valid data from the images.";
+            err.userAction = "Try again with clearer images or re-upload.";
+            throw err;
+          }
+        }
+        const err = new Error("Could not extract JSON from AI response");
+        err.userMessage = "The AI did not return extractable data from the images.";
+        err.userAction = "Try again with clearer receipt, odometer, and pump images.";
+        throw err;
+      }
+
+      function populateForm(data) {
+        document.getElementById("date").value =
+          data.date || new Date().toISOString().slice(0, 19);
+        document.getElementById("kilometer").value = data.kilometer || "";
+        document.getElementById("amount").value = data.amount || "";
+        document.getElementById("volume").value = data.volume || "";
+        document.getElementById("rate").value = data.rate || "";
+        document.getElementById("density").value = data.density || "";
+        document.getElementById("petrolBunk").value = data.petrolBunk || "";
+        document.getElementById("location").value = data.location || "";
+        document.getElementById("petrolType").value = data.petrolType || "";
+        document.getElementById("vehicleNo").value = data.vehicleNo || "";
+
+        // Mark AI-filled fields
+        document
+          .querySelectorAll(
+            'input[type="number"], input[type="text"], input[type="datetime-local"], select',
+          )
+          .forEach((input) => {
+            if (input.value) input.classList.add("ai-filled");
+          });
+      }
+
+      function createMergedImage() {
+        const canvas = document.getElementById("mergedCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Order: Receipt, Bike, Meter (r + b + m) - HORIZONTAL layout
+        const images = [new Image(), new Image(), new Image()];
+
+        images[0].src = uploadedImages.receipt;
+        images[1].src = uploadedImages.odometer;
+        images[2].src = uploadedImages.pump;
+
+        Promise.all(
+          images.map((img) => new Promise((resolve) => (img.onload = resolve))),
+        ).then(() => {
+          // Calculate dimensions for horizontal layout
+          const maxHeight = Math.max(...images.map((img) => img.height));
+          const totalWidth = images.reduce((sum, img) => sum + img.width, 0);
+          const padding = 60; // Space for labels
+          const gap = 20; // Gap between images
+
+          // Original canvas dimensions
+          const originalWidth = totalWidth + (images.length - 1) * gap;
+          const originalHeight = maxHeight + padding;
+
+          // Set canvas to actual size for high quality rendering
+          canvas.width = originalWidth;
+          canvas.height = originalHeight;
+
+          // Calculate max display width (container width - some margin)
+          const maxDisplayWidth = 820; // Max width to prevent overflow
+
+          // Scale down for display if needed
+          if (originalWidth > maxDisplayWidth) {
+            const scale = maxDisplayWidth / originalWidth;
+            canvas.style.width = maxDisplayWidth + "px";
+            canvas.style.height = originalHeight * scale + "px";
+          } else {
+            canvas.style.width = originalWidth + "px";
+            canvas.style.height = originalHeight + "px";
+          }
+
+          // White background
+          ctx.fillStyle = "white";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          let xOffset = 0;
+          const labels = ["Receipt", "Bike Odometer", "Pump Display"];
+
+          images.forEach((img, index) => {
+            // Draw label
+            ctx.fillStyle = "#667eea";
+            ctx.font = "bold 20px Arial";
+            ctx.fillText(labels[index], xOffset + 10, 30);
+
+            // Draw image
+            const y = padding;
+            const scaledHeight = img.height;
+            const scaledWidth = img.width;
+
+            ctx.drawImage(img, xOffset, y, scaledWidth, scaledHeight);
+            xOffset += scaledWidth + gap;
+          });
+
+          document.getElementById("mergedPreview").style.display = "block";
+        });
+      }
+
+      function downloadMergedImage() {
+        const canvas = document.getElementById("mergedCanvas");
+        const link = document.createElement("a");
+        const date = new Date().toISOString().slice(0, 10);
+        link.download = `petrol-record-${date}.webp`;
+        link.href = canvas.toDataURL("image/webp", 0.95); // High quality WebP
+        link.click();
+      }
+
+      document
+        .getElementById("petrolForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          // Get the submit button and disable it immediately
+          const submitBtn = e.target.querySelector('button[type="submit"]');
+          const originalBtnText = submitBtn.textContent;
+          submitBtn.disabled = true;
+          submitBtn.textContent = "⏳ Submitting...";
+          submitBtn.style.cursor = "not-allowed";
+
+          const formData = new FormData();
+
+          // Add images in r+b+m order
+          formData.append("receipt", uploadedImages.receipt);
+          formData.append("odometer", uploadedImages.odometer);
+          formData.append("pump", uploadedImages.pump);
+
+          formData.append("date", document.getElementById("date").value);
+          formData.append("rate", document.getElementById("rate").value);
+          formData.append("amount", document.getElementById("amount").value);
+          formData.append(
+            "kilometer",
+            document.getElementById("kilometer").value,
+          );
+          const currentKm = parseFloat(document.getElementById("kilometer").value) || null;
+          const lastKmVal = document.getElementById("lastKilometer").value.trim();
+          const lastKm = lastKmVal !== "" ? parseFloat(lastKmVal) : null;
+          if (currentKm !== null && lastKm !== null && !isNaN(lastKm)) {
+            const currentDisplay = Math.floor(currentKm / 10);
+            const lastDisplay = (lastKm >= 100000) ? Math.floor(lastKm / 10) : lastKm;
+            const kmRunComputed = currentDisplay - lastDisplay;
+            document.getElementById("kmRun").value = String(kmRunComputed);
+            formData.append("kmRun", String(kmRunComputed));
+          }
+          formData.append("volume", document.getElementById("volume").value);
+          formData.append(
+            "vehicleNo",
+            document.getElementById("vehicleNo").value,
+          );
+          formData.append(
+            "petrolBunk",
+            document.getElementById("petrolBunk").value,
+          );
+          formData.append("density", document.getElementById("density").value);
+          formData.append(
+            "location",
+            document.getElementById("location").value,
+          );
+          formData.append(
+            "oilChange",
+            document.getElementById("oilChange").value,
+          );
+          formData.append(
+            "petrolType",
+            document.getElementById("petrolType").value,
+          );
+
+          // Add merged image as WebP
+          const canvas = document.getElementById("mergedCanvas");
+          const mergedImageData = canvas
+            .toDataURL("image/webp", 0.95)
+            .split(",")[1];
+          formData.append("fileName", `merged-${Date.now()}.webp`);
+          formData.append("fileData", mergedImageData);
+          formData.append("mimeType", "image/webp");
+
+          try {
+            hideErrorDetail();
+            const response = await fetch(SCRIPT_URL, {
+              method: "POST",
+              body: formData,
+            });
+
+            let result;
+            try {
+              result = await response.json();
+            } catch (_) {
+              const text = await response.text().catch(() => "");
+              showErrorDetail(
+                "Server returned invalid response (status " + response.status + ")." + (text ? " " + text.slice(0, 200) : ""),
+                "Check your Google Apps Script URL and deployment.",
+              );
+              submitBtn.disabled = false;
+              submitBtn.textContent = originalBtnText;
+              submitBtn.style.cursor = "pointer";
+              return;
+            }
+
+            if (response.ok && result.success) {
+              showMessage(
+                "✅ Data submitted successfully! Refreshing page...",
+                "success",
+              );
+              setTimeout(() => location.reload(), 2000);
+              return;
+            }
+
+            if (!response.ok) {
+              const info = getScriptErrorInfo(response.status, result);
+              showErrorDetail(info.message, info.action);
+            } else {
+              showErrorDetail(
+                result.error || "Submission failed. No details returned.",
+                "Check your Google Apps Script execution logs and try again.",
+              );
+            }
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalBtnText;
+            submitBtn.style.cursor = "pointer";
+          } catch (error) {
+            showErrorDetail(
+              "Network or unexpected error: " + (error.message || "Unknown error"),
+              "Check your connection and SCRIPT_URL, then try again.",
+            );
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalBtnText;
+            submitBtn.style.cursor = "pointer";
+          }
+        });
+
+      function showMessage(text, type) {
+        const msg = document.getElementById("message");
+        const errDetail = document.getElementById("errorDetail");
+        errDetail.style.display = "none";
+        msg.textContent = text;
+        msg.className = "message " + type;
+        msg.style.display = "block";
+        if (type === "success")
+          setTimeout(() => (msg.style.display = "none"), 5000);
+      }
+
+      function showErrorDetail(message, action) {
+        document.getElementById("message").style.display = "none";
+        const box = document.getElementById("errorDetail");
+        document.getElementById("errorDetailText").textContent = message;
+        document.getElementById("errorAction").textContent = action ? "→ " + action : "";
+        box.style.display = "block";
+      }
+
+      function hideErrorDetail() {
+        document.getElementById("errorDetail").style.display = "none";
+      }
+
+      function getOpenRouterErrorInfo(status, body) {
+        const byStatus = {
+          401: {
+            message: "Your API key is invalid or unauthorized.",
+            action: "Check your OpenRouter API key at openrouter.ai and ensure it’s correct and has credits.",
+          },
+          403: {
+            message: "Access forbidden. The request was rejected.",
+            action: "Your API key may not have access to this model. Check OpenRouter dashboard or try another model.",
+          },
+          429: {
+            message: "Rate limit exceeded. Too many requests.",
+            action: "Wait a few minutes and try again, or check your OpenRouter usage limits.",
+          },
+          500: {
+            message: "OpenRouter server error. The AI service had a problem.",
+            action: "Try again in a few minutes. If it persists, check status.openrouter.ai.",
+          },
+          502: {
+            message: "AI service temporarily unavailable.",
+            action: "Try again in a few minutes.",
+          },
+          503: {
+            message: "AI service temporarily unavailable.",
+            action: "Try again in a few minutes.",
+          },
+        };
+        const info = byStatus[status];
+        if (info) {
+          const detail = body && (body.error?.message || body.error);
+          return {
+            message: detail ? info.message + " " + (typeof detail === "string" ? detail : detail.message || "") : info.message,
+            action: info.action,
+          };
+        }
+        const detail = body && (body.error?.message || body.error);
+        return {
+          message: detail ? "Request failed (" + status + "): " + (typeof detail === "string" ? detail : detail.message || "") : "Request failed with status " + status + ".",
+          action: "Check your API key and network, then retry.",
+        };
+      }
+
+      function getScriptErrorInfo(status, body) {
+        const byStatus = {
+          401: {
+            message: "Authorization failed. The script rejected the request.",
+            action: "Ensure your Google Apps Script is deployed as “Anyone” (or correct user) and the script URL is correct.",
+          },
+          403: {
+            message: "Authorization failed. The script rejected the request.",
+            action: "Ensure your Google Apps Script is deployed as \"Anyone\" (or correct user) and the script URL is correct.",
+          },
+          404: {
+            message: "Script URL not found.",
+            action: "Check SCRIPT_URL in the code and redeploy your Google Apps Script if needed.",
+          },
+          500: {
+            message: "Server error while submitting to Google Sheets.",
+            action: "Check your Apps Script execution logs and fix any errors, then try again.",
+          },
+        };
+        const info = byStatus[status];
+        if (info) {
+          const detail = body && (body.error || body.message);
+          return {
+            message: detail ? info.message + " " + (typeof detail === "string" ? detail : detail) : info.message,
+            action: info.action,
+          };
+        }
+        return {
+          message: body && (body.error || body.message) ? String(body.error || body.message) : "Request failed (status " + status + ").",
+          action: "Check SCRIPT_URL and script permissions, then retry.",
+        };
+      }
+
+      // --- Get last record (URL params + button) ---
+      function getUrlParams() {
+        const p = new URLSearchParams(window.location.search);
+        const monthParam = (p.get("month") || "").trim();
+        const yearParam = (p.get("year") || "").trim();
+        const vehicle = (p.get("vehicle") || p.get("vehicleNo") || "").trim();
+        const lr = (p.get("LR") || p.get("lr") || "").trim();
+        let month = "", year = "";
+        if (monthParam) {
+          const parts = monthParam.split(/\s+/);
+          if (parts.length >= 2) {
+            month = parts[0];
+            year = parts[1].replace(/^20/, "");
+          } else {
+            month = monthParam;
+            year = yearParam || "";
+          }
+        }
+        return { month, year, vehicle, lr };
+      }
+
+      function getMonthYearForLastRecord() {
+        const url = getUrlParams();
+        if (url.month && url.vehicle) return { month: url.month, year: url.year };
+        const dateInput = document.getElementById("date");
+        if (dateInput && dateInput.value) {
+          const d = new Date(dateInput.value);
+          const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+          return { month: months[d.getMonth()], year: String(d.getFullYear()).slice(-2) };
+        }
+        const d = new Date();
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        return { month: months[d.getMonth()], year: String(d.getFullYear()).slice(-2) };
+      }
+
+      async function fetchLastRecord() {
+        const vehicle = (document.getElementById("vehicleNo").value || "").trim();
+        if (!vehicle) {
+          showMessage("Enter a vehicle number first.", "error");
+          return;
+        }
+        const { month, year } = getMonthYearForLastRecord();
+        const sep = SCRIPT_URL.indexOf("?") >= 0 ? "&" : "?";
+        const url = SCRIPT_URL + sep + "month=" + encodeURIComponent(month) + (year ? "&year=" + encodeURIComponent(year) : "") + "&vehicle=" + encodeURIComponent(vehicle) + "&LR=1";
+        const btn = document.getElementById("getLastRecordBtn");
+        if (btn) { btn.disabled = true; btn.textContent = "Loading..."; }
+        try {
+          const res = await fetch(url, { method: "GET" });
+          const data = await res.json().catch(() => ({}));
+          if (data.success && data.km != null && data.km !== "") {
+            const lastKm = Number(data.km);
+            document.getElementById("lastKilometer").value = lastKm;
+            showMessage("Last record: " + lastKm + " km (date: " + (data.date || "") + "). KM run = current − this on submit.", "success");
+          } else if (data.success) {
+            showMessage("No previous record found for this vehicle in " + month + (year ? " " + year : "") + ".", "info");
+          } else {
+            showMessage(data.error || "Could not load last record.", "error");
+          }
+        } catch (e) {
+          showMessage("Failed to fetch last record: " + (e.message || "network error"), "error");
+        } finally {
+          if (btn) { btn.disabled = false; btn.textContent = "Get the last record"; }
+        }
+      }
+
+      function applyUrlParams() {
+        const { month, year, vehicle, lr } = getUrlParams();
+        if (vehicle) {
+          const el = document.getElementById("vehicleNo");
+          if (el) el.value = vehicle;
+        }
+        if (lr === "1" && vehicle) {
+          const { month: m, year: y } = getMonthYearForLastRecord();
+          if (m) fetchLastRecord();
+        }
+      }
+
+      document.getElementById("getLastRecordBtn").addEventListener("click", fetchLastRecord);
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", applyUrlParams);
+      } else {
+        applyUrlParams();
+      }
+    </script>
+  </body>
+</html>
