@@ -87,6 +87,13 @@
         border-style: solid;
       }
 
+      .upload-box.drag-over {
+        border-color: #667eea;
+        border-style: solid;
+        background: #eef0ff;
+        transform: scale(1.03);
+      }
+
       .upload-box input[type="file"] {
         display: none;
       }
@@ -113,6 +120,24 @@
         max-height: 150px;
         margin-top: 10px;
         border-radius: 8px;
+      }
+
+      .paste-btn {
+        width: 100%;
+        padding: 12px;
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: all 0.3s;
+      }
+
+      .paste-btn:hover {
+        background: #f0f2ff;
       }
 
       .process-btn {
@@ -347,6 +372,7 @@
           <!-- Receipt (First) -->
           <div
             class="upload-box"
+            data-type="receipt"
             onclick="document.getElementById('receipt').click()"
           >
             <input
@@ -368,6 +394,7 @@
           <!-- Bike Odometer (Second) -->
           <div
             class="upload-box"
+            data-type="odometer"
             onclick="document.getElementById('odometer').click()"
           >
             <input
@@ -389,6 +416,7 @@
           <!-- Pump Display (Third) -->
           <div
             class="upload-box"
+            data-type="pump"
             onclick="document.getElementById('pump').click()"
           >
             <input
@@ -403,6 +431,10 @@
             <img id="preview-pump" class="preview-img" style="display: none" />
           </div>
         </div>
+
+        <button class="paste-btn" onclick="pasteFromClipboard()">
+          📋 Paste Image from Clipboard
+        </button>
 
         <button
           class="process-btn"
@@ -614,6 +646,84 @@
         document.getElementById("processBtn").disabled = !allUploaded;
       }
 
+      function loadImageIntoSlot(type, blob) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          uploadedImages[type] = e.target.result;
+          const preview = document.getElementById(`preview-${type}`);
+          preview.src = e.target.result;
+          preview.style.display = "block";
+          document
+            .querySelector(`.upload-box[data-type="${type}"]`)
+            .classList.add("has-image");
+          checkAllImagesUploaded();
+        };
+        reader.readAsDataURL(blob);
+      }
+
+      // Drag-and-drop for each upload box
+      document.querySelectorAll(".upload-box").forEach((box) => {
+        box.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          box.classList.add("drag-over");
+        });
+        box.addEventListener("dragleave", () => {
+          box.classList.remove("drag-over");
+        });
+        box.addEventListener("drop", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          box.classList.remove("drag-over");
+          const file = e.dataTransfer.files[0];
+          if (file && file.type.startsWith("image/")) {
+            loadImageIntoSlot(box.dataset.type, file);
+          }
+        });
+      });
+
+      // Paste from clipboard (e.g. copy image in WhatsApp → Ctrl+V here)
+      document.addEventListener("paste", (e) => {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+        for (const item of items) {
+          if (item.type.startsWith("image/")) {
+            const blob = item.getAsFile();
+            const types = ["receipt", "odometer", "pump"];
+            const emptyType = types.find((t) => !uploadedImages[t]);
+            if (emptyType) loadImageIntoSlot(emptyType, blob);
+            break;
+          }
+        }
+      });
+
+      // Clipboard API paste — works even when the page has lost focus
+      async function pasteFromClipboard() {
+        try {
+          const clipboardItems = await navigator.clipboard.read();
+          let found = false;
+          for (const clipItem of clipboardItems) {
+            const imageType = clipItem.types.find((t) => t.startsWith("image/"));
+            if (imageType) {
+              const blob = await clipItem.getType(imageType);
+              const types = ["receipt", "odometer", "pump"];
+              const emptyType = types.find((t) => !uploadedImages[t]);
+              if (emptyType) {
+                loadImageIntoSlot(emptyType, blob);
+                found = true;
+              } else {
+                alert("All 3 slots are already filled. Clear one first.");
+                found = true;
+              }
+              break;
+            }
+          }
+          if (!found) {
+            alert("No image found on clipboard. Right-click an image → Copy image, then click this button.");
+          }
+        } catch (err) {
+          alert("Clipboard access denied. Please allow clipboard permission when the browser asks, then try again.");
+        }
+      }
 
       async function processImagesWithAI() {
         document.getElementById("loading").style.display = "block";
