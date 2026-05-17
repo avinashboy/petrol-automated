@@ -50,16 +50,13 @@ This is the most important step. The file `google-apps-script.gs` in this repo i
 
 #### Step 1 — Open the target spreadsheet
 
-The script is pre-configured to write into this specific spreadsheet:
+Create a new Google Spreadsheet (or use an existing one). Copy the spreadsheet ID from its URL:
 
 ```
-Spreadsheet ID: 1pwB6xA5RTVFjXsUfU9UI72ZlToNhsgBCzdwjwYcPcx0
+https://docs.google.com/spreadsheets/d/<YOUR_SPREADSHEET_ID>/edit
 ```
 
-Open it at:
-`https://docs.google.com/spreadsheets/d/1pwB6xA5RTVFjXsUfU9UI72ZlToNhsgBCzdwjwYcPcx0/edit`
-
-> If you want to use a different spreadsheet, open it and copy its ID from the URL, then update the `SPREADSHEET_ID` constant at the top of `google-apps-script.gs` before deploying.
+Open `google-apps-script.gs` and replace `YOUR_SPREADSHEET_ID` at the top of the file with your actual spreadsheet ID before pasting it into the Apps Script editor.
 
 #### Step 2 — Open Apps Script editor
 
@@ -115,7 +112,7 @@ At the top of `google-apps-script.gs` you can adjust these:
 
 | Constant | Default | Description |
 |---|---|---|
-| `SPREADSHEET_ID` | `1pwB6xA5RTVFjXsUfU9UI72ZlToNhsgBCzdwjwYcPcx0` | The Google Sheets spreadsheet to write to |
+| `SPREADSHEET_ID` | `YOUR_SPREADSHEET_ID` | The Google Sheets spreadsheet to write to — replace with your own ID |
 | `FOLDER_NAME` | `Petrol Records - Uploaded Files` | Root Google Drive folder where merged images are stored |
 | `HIGHLIGHT_COLOR` | `#FFF3CD` | Row background color when Oil or Both service is recorded |
 

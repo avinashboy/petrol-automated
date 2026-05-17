@@ -2,22 +2,23 @@
  * GOOGLE APPS SCRIPT - Backend for Petrol Record System
  * 
  * SETUP INSTRUCTIONS:
- * 1. This script is configured to work with a SPECIFIC spreadsheet
- * 2. Spreadsheet ID: 1pwB6xA5RTVFjXsUfU9UI72ZlToNhsgBCzdwjwYcPcx0
- * 3. Open this spreadsheet: https://docs.google.com/spreadsheets/d/1pwB6xA5RTVFjXsUfU9UI72ZlToNhsgBCzdwjwYcPcx0/edit
- * 4. Go to Extensions > Apps Script
- * 5. Delete any existing code and paste this entire script
- * 6. Save the project (Ctrl+S or Cmd+S)
- * 7. Click "Deploy" > "New deployment"
- * 8. Choose type: "Web app"
- * 9. Set "Execute as": Me
- * 10. Set "Who has access": Anyone
- * 11. Click "Deploy" and copy the Web App URL
- * 12. Paste that URL into the SCRIPT_URL variable in index.html
+ * 1. Create a new Google Spreadsheet (or use an existing one).
+ * 2. Copy the spreadsheet ID from its URL:
+ *    https://docs.google.com/spreadsheets/d/<SPREADSHEET_ID>/edit
+ * 3. Paste your spreadsheet ID into the SPREADSHEET_ID constant below.
+ * 4. Go to Extensions > Apps Script inside that spreadsheet.
+ * 5. Delete any existing code and paste this entire script.
+ * 6. Save the project (Ctrl+S or Cmd+S).
+ * 7. Click "Deploy" > "New deployment".
+ * 8. Choose type: "Web app".
+ * 9. Set "Execute as": Me.
+ * 10. Set "Who has access": Anyone.
+ * 11. Click "Deploy", authorize when prompted, then copy the Web App URL.
+ * 12. Add that URL as the SCRIPT_URL environment variable in Cloudflare Pages.
  */
 
-// Configuration
-const SPREADSHEET_ID = '1pwB6xA5RTVFjXsUfU9UI72ZlToNhsgBCzdwjwYcPcx0'; // Your specific spreadsheet
+// Configuration — update SPREADSHEET_ID before deploying
+const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID'; // Paste your Google Sheets spreadsheet ID here
 const FOLDER_NAME = 'Petrol Records - Uploaded Files'; // Folder for uploaded files
 const HIGHLIGHT_COLOR = '#FFF3CD'; // Light yellow highlight for Oil or Both rows ONLY (not None or Air)
 
