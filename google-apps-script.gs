@@ -3,8 +3,8 @@
  * 
  * SETUP INSTRUCTIONS:
  * 1. This script is configured to work with a SPECIFIC spreadsheet
- * 2. Spreadsheet ID: 1pwB6xA5RTVFjXsUfU9UI72ZlToNhsgBCzdwjwYcPcx0
- * 3. Open this spreadsheet: https://docs.google.com/spreadsheets/d/1pwB6xA5RTVFjXsUfU9UI72ZlToNhsgBCzdwjwYcPcx0/edit
+ * 2. Spreadsheet ID: <ADD_YOUR_SHEET_ID> - replace your Sheet ID.
+ * 3. Open this spreadsheet: https://docs.google.com/spreadsheets/d/<YOUR_SPREADSHEET_ID>/edit
  * 4. Go to Extensions > Apps Script
  * 5. Delete any existing code and paste this entire script
  * 6. Save the project (Ctrl+S or Cmd+S)
@@ -17,7 +17,7 @@
  */
 
 // Configuration
-const SPREADSHEET_ID = '1pwB6xA5RTVFjXsUfU9UI72ZlToNhsgBCzdwjwYcPcx0'; // Your specific spreadsheet
+const SPREADSHEET_ID = '<ADD_YOUR_SHEET_ID>'; // Your specific spreadsheet - replace your Sheet ID.
 const FOLDER_NAME = 'Petrol Records - Uploaded Files'; // Folder for uploaded files
 const HIGHLIGHT_COLOR = '#FFF3CD'; // Light yellow highlight for Oil or Both rows ONLY (not None or Air)
 
