@@ -77,6 +77,74 @@
         position: relative;
       }
 
+      .upload-box.optional-slot {
+        border-color: #c4b5fd;
+        background: #faf8ff;
+      }
+
+      .optional-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #764ba2;
+        color: white;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        padding: 3px 8px;
+        border-radius: 999px;
+      }
+
+      .clear-slot-btn {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        z-index: 2;
+        border: none;
+        background: #dc3545;
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        font-size: 16px;
+        line-height: 1;
+        cursor: pointer;
+        display: none;
+      }
+
+      .upload-box.has-image .clear-slot-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .optional-add-btn {
+        width: 100%;
+        margin-top: 15px;
+        padding: 12px;
+        background: white;
+        color: #764ba2;
+        border: 2px dashed #764ba2;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .optional-add-btn:hover {
+        background: #faf8ff;
+      }
+
+      #densitySlotWrap {
+        display: none;
+        margin-top: 15px;
+      }
+
+      #densitySlotWrap.visible {
+        display: block;
+      }
+
       .upload-box:hover {
         border-color: #667eea;
         background: #f8f9ff;
@@ -362,10 +430,11 @@
 
       <!-- Image Upload Section -->
       <div class="upload-section">
-        <h2 style="margin-bottom: 10px">📸 Upload 3 Images</h2>
+        <h2 style="margin-bottom: 10px">📸 Upload Images</h2>
         <p style="color: #666; font-size: 14px; margin-bottom: 20px">
-          Upload receipt, bike odometer, and pump display. AI will extract all
-          data automatically.
+          Upload receipt, bike odometer, and pump display. Add an optional
+          density-board photo when density is not on the pump. AI extracts the
+          data; the final collage stacks images vertically.
         </p>
 
         <div class="upload-grid">
@@ -429,6 +498,47 @@
             <div class="upload-label">Pump Display</div>
             <div class="upload-hint">Rate, Volume, Density</div>
             <img id="preview-pump" class="preview-img" style="display: none" />
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="optional-add-btn"
+          id="showDensitySlotBtn"
+          onclick="showDensitySlot()"
+        >
+          + Add density board photo (optional)
+        </button>
+
+        <div id="densitySlotWrap">
+          <div
+            class="upload-box optional-slot"
+            data-type="density"
+            onclick="if (!event.target.closest('.clear-slot-btn')) document.getElementById('densityBoard').click()"
+          >
+            <button
+              type="button"
+              class="clear-slot-btn"
+              title="Remove density board photo"
+              onclick="event.stopPropagation(); clearImageSlot('density')"
+            >
+              ×
+            </button>
+            <span class="optional-badge">Optional</span>
+            <input
+              type="file"
+              id="densityBoard"
+              accept="image/*"
+              onchange="handleImageUpload(this, 'density')"
+            />
+            <div class="upload-icon">📏</div>
+            <div class="upload-label">Density Board</div>
+            <div class="upload-hint">Board / wall density reading</div>
+            <img
+              id="preview-density"
+              class="preview-img"
+              style="display: none"
+            />
           </div>
         </div>
 
@@ -582,7 +692,7 @@
           </div>
 
           <div class="merged-preview" id="mergedPreview" style="display: none">
-            <h3>Merged Image (Horizontal Layout - WebP)</h3>
+            <h3>Merged Image (Vertical Stack - WebP)</h3>
             <canvas id="mergedCanvas"></canvas>
             <br />
             <button
@@ -621,7 +731,40 @@
         receipt: null,
         odometer: null,
         pump: null,
+        density: null,
       };
+
+      const REQUIRED_IMAGE_TYPES = ["receipt", "odometer", "pump"];
+
+      function showDensitySlot() {
+        const wrap = document.getElementById("densitySlotWrap");
+        wrap.classList.add("visible");
+        document.getElementById("showDensitySlotBtn").style.display = "none";
+        document.getElementById("densityBoard").click();
+      }
+
+      function clearImageSlot(type) {
+        uploadedImages[type] = null;
+        const preview = document.getElementById(`preview-${type}`);
+        if (preview) {
+          preview.src = "";
+          preview.style.display = "none";
+        }
+        const box = document.querySelector(`.upload-box[data-type="${type}"]`);
+        if (box) box.classList.remove("has-image");
+        const input = box && box.querySelector('input[type="file"]');
+        if (input) input.value = "";
+
+        if (type === "density") {
+          document.getElementById("densitySlotWrap").classList.remove("visible");
+          document.getElementById("showDensitySlotBtn").style.display = "block";
+        }
+
+        checkAllImagesUploaded();
+        if (document.getElementById("formSection").classList.contains("visible")) {
+          createMergedImage();
+        }
+      }
 
       function handleImageUpload(input, type) {
         if (input.files && input.files[0]) {
@@ -632,17 +775,24 @@
             preview.src = e.target.result;
             preview.style.display = "block";
             input.parentElement.classList.add("has-image");
+            if (type === "density") {
+              document.getElementById("densitySlotWrap").classList.add("visible");
+              document.getElementById("showDensitySlotBtn").style.display = "none";
+            }
             checkAllImagesUploaded();
+            if (
+              type === "density" &&
+              document.getElementById("formSection").classList.contains("visible")
+            ) {
+              createMergedImage();
+            }
           };
           reader.readAsDataURL(input.files[0]);
         }
       }
 
       function checkAllImagesUploaded() {
-        const allUploaded =
-          uploadedImages.receipt &&
-          uploadedImages.odometer &&
-          uploadedImages.pump;
+        const allUploaded = REQUIRED_IMAGE_TYPES.every((t) => uploadedImages[t]);
         document.getElementById("processBtn").disabled = !allUploaded;
       }
 
@@ -656,7 +806,17 @@
           document
             .querySelector(`.upload-box[data-type="${type}"]`)
             .classList.add("has-image");
+          if (type === "density") {
+            document.getElementById("densitySlotWrap").classList.add("visible");
+            document.getElementById("showDensitySlotBtn").style.display = "none";
+          }
           checkAllImagesUploaded();
+          if (
+            type === "density" &&
+            document.getElementById("formSection").classList.contains("visible")
+          ) {
+            createMergedImage();
+          }
         };
         reader.readAsDataURL(blob);
       }
@@ -688,9 +848,12 @@
         for (const item of items) {
           if (item.type.startsWith("image/")) {
             const blob = item.getAsFile();
-            const types = ["receipt", "odometer", "pump"];
-            const emptyType = types.find((t) => !uploadedImages[t]);
-            if (emptyType) loadImageIntoSlot(emptyType, blob);
+            const emptyRequired = REQUIRED_IMAGE_TYPES.find((t) => !uploadedImages[t]);
+            if (emptyRequired) {
+              loadImageIntoSlot(emptyRequired, blob);
+            } else if (!uploadedImages.density) {
+              loadImageIntoSlot("density", blob);
+            }
             break;
           }
         }
@@ -705,13 +868,15 @@
             const imageType = clipItem.types.find((t) => t.startsWith("image/"));
             if (imageType) {
               const blob = await clipItem.getType(imageType);
-              const types = ["receipt", "odometer", "pump"];
-              const emptyType = types.find((t) => !uploadedImages[t]);
-              if (emptyType) {
-                loadImageIntoSlot(emptyType, blob);
+              const emptyRequired = REQUIRED_IMAGE_TYPES.find((t) => !uploadedImages[t]);
+              if (emptyRequired) {
+                loadImageIntoSlot(emptyRequired, blob);
+                found = true;
+              } else if (!uploadedImages.density) {
+                loadImageIntoSlot("density", blob);
                 found = true;
               } else {
-                alert("All 3 slots are already filled. Clear one first.");
+                alert("All slots are already filled. Clear one first.");
                 found = true;
               }
               break;
@@ -759,20 +924,23 @@
       }
 
       async function extractDataFromImages() {
-        const prompt = `You are analyzing THREE images from a petrol/fuel purchase in this EXACT ORDER:
+        const hasDensityBoard = !!uploadedImages.density;
+        const prompt = `You are analyzing ${hasDensityBoard ? "FOUR" : "THREE"} images from a petrol/fuel purchase in this EXACT ORDER:
 
 IMAGE 1 (Receipt): Extract date, time, location, station name, Rate/Ltr, Volume(Ltr), Amount(Rs), Product type
 IMAGE 2 (Bike Odometer/Speedometer): Extract the kilometer reading from the digital display (6-digit number)
-IMAGE 3 (Pump Display): Extract Amount(₹), Volume(L), Rate(₹/L), and DENSITY (Kg/m³) shown on the display
+IMAGE 3 (Pump Display): Extract Amount(₹), Volume(L), Rate(₹/L), and DENSITY (Kg/m³) if shown on the display
+${hasDensityBoard ? "IMAGE 4 (Density Board): Extract the exact density (Kg/m³) from the board/wall/sign photo. Prefer this over pump density when present." : ""}
 
 CRITICAL INSTRUCTIONS FOR DENSITY:
 - Look carefully at the pump display for a separate "Density" meter/display showing Kg/m³ unit
 - The density value is typically shown in a smaller display on the right side
 - Density is usually in the range of 730-770 Kg/m³
 - If you see a 4-digit number with Kg/m³ label, that is the DENSITY (e.g., 748.4)
+${hasDensityBoard ? "- IMAGE 4 is a dedicated density board photo — use it as the primary source for density" : ""}
 
 EXTRACTION REQUIREMENTS:
-1. DENSITY: Extract the exact number from "Density Kg/m³" display on pump (e.g., 748.4)
+1. DENSITY: Extract the exact number from ${hasDensityBoard ? "IMAGE 4 density board first, otherwise " : ""}"Density Kg/m³" on pump (e.g., 748.4)
 2. RATE: Extract rate per liter from pump display in ₹/L (e.g., 101.12)
 3. VOLUME: Extract volume in liters from pump display (e.g., 4.60)
 4. AMOUNT: Extract total amount from pump display in rupees (e.g., 465.15)
@@ -798,9 +966,31 @@ CRITICAL: Return ONLY this JSON structure with exact numerical values:
 
 VALIDATION:
 - ALL numeric fields MUST be present and accurate
-- Density MUST be extracted from the pump display's density meter
+- Density MUST be extracted from the ${hasDensityBoard ? "density board image or " : ""}pump display's density meter
 - If density is not clearly visible, estimate based on typical petrol density (745-755)
 - Return ONLY valid JSON without markdown code blocks or explanations`;
+
+        const contentParts = [
+          { type: "text", text: prompt },
+          {
+            type: "image_url",
+            image_url: { url: uploadedImages.receipt },
+          },
+          {
+            type: "image_url",
+            image_url: { url: uploadedImages.odometer },
+          },
+          {
+            type: "image_url",
+            image_url: { url: uploadedImages.pump },
+          },
+        ];
+        if (hasDensityBoard) {
+          contentParts.push({
+            type: "image_url",
+            image_url: { url: uploadedImages.density },
+          });
+        }
 
         const response = await fetch(
           OPENROUTER_PROXY_URL,
@@ -814,21 +1004,7 @@ VALIDATION:
               messages: [
                 {
                   role: "user",
-                  content: [
-                    { type: "text", text: prompt },
-                    {
-                      type: "image_url",
-                      image_url: { url: uploadedImages.receipt },
-                    },
-                    {
-                      type: "image_url",
-                      image_url: { url: uploadedImages.odometer },
-                    },
-                    {
-                      type: "image_url",
-                      image_url: { url: uploadedImages.pump },
-                    },
-                  ],
+                  content: contentParts,
                 },
               ],
             }),
@@ -924,34 +1100,56 @@ VALIDATION:
         const canvas = document.getElementById("mergedCanvas");
         const ctx = canvas.getContext("2d");
 
-        // Order: Receipt, Bike, Meter (r + b + m) - HORIZONTAL layout
-        const images = [new Image(), new Image(), new Image()];
+        // Vertical stack: Receipt → Bike → Pump → optional Density Board
+        const slots = [
+          { src: uploadedImages.receipt, label: "1. Receipt" },
+          { src: uploadedImages.odometer, label: "2. Bike Odometer" },
+          { src: uploadedImages.pump, label: "3. Pump Display" },
+        ];
+        if (uploadedImages.density) {
+          slots.push({ src: uploadedImages.density, label: "4. Density Board" });
+        }
 
-        images[0].src = uploadedImages.receipt;
-        images[1].src = uploadedImages.odometer;
-        images[2].src = uploadedImages.pump;
+        const images = slots.map((slot) => {
+          const img = new Image();
+          img.src = slot.src;
+          return img;
+        });
 
         Promise.all(
-          images.map((img) => new Promise((resolve) => (img.onload = resolve))),
+          images.map(
+            (img) =>
+              new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+              }),
+          ),
         ).then(() => {
-          // Calculate dimensions for horizontal layout
-          const maxHeight = Math.max(...images.map((img) => img.height));
-          const totalWidth = images.reduce((sum, img) => sum + img.width, 0);
-          const padding = 60; // Space for labels
-          const gap = 20; // Gap between images
+          const targetWidth = 900;
+          const labelPad = 42;
+          const gap = 16;
+          const sidePad = 16;
 
-          // Original canvas dimensions
-          const originalWidth = totalWidth + (images.length - 1) * gap;
-          const originalHeight = maxHeight + padding;
+          const layouts = images.map((img) => {
+            const scale = (targetWidth - sidePad * 2) / img.width;
+            return {
+              img,
+              w: targetWidth - sidePad * 2,
+              h: Math.round(img.height * scale),
+            };
+          });
 
-          // Set canvas to actual size for high quality rendering
+          const originalWidth = targetWidth;
+          const originalHeight =
+            layouts.reduce((sum, item) => sum + item.h, 0) +
+            slots.length * labelPad +
+            (slots.length - 1) * gap +
+            sidePad;
+
           canvas.width = originalWidth;
           canvas.height = originalHeight;
 
-          // Calculate max display width (container width - some margin)
-          const maxDisplayWidth = 820; // Max width to prevent overflow
-
-          // Scale down for display if needed
+          const maxDisplayWidth = 820;
           if (originalWidth > maxDisplayWidth) {
             const scale = maxDisplayWidth / originalWidth;
             canvas.style.width = maxDisplayWidth + "px";
@@ -961,26 +1159,18 @@ VALIDATION:
             canvas.style.height = originalHeight + "px";
           }
 
-          // White background
           ctx.fillStyle = "white";
           ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-          let xOffset = 0;
-          const labels = ["Receipt", "Bike Odometer", "Pump Display"];
-
-          images.forEach((img, index) => {
-            // Draw label
+          let yOffset = sidePad;
+          layouts.forEach((layout, index) => {
             ctx.fillStyle = "#667eea";
-            ctx.font = "bold 20px Arial";
-            ctx.fillText(labels[index], xOffset + 10, 30);
+            ctx.font = "bold 22px Arial";
+            ctx.fillText(slots[index].label, sidePad, yOffset + 28);
 
-            // Draw image
-            const y = padding;
-            const scaledHeight = img.height;
-            const scaledWidth = img.width;
-
-            ctx.drawImage(img, xOffset, y, scaledWidth, scaledHeight);
-            xOffset += scaledWidth + gap;
+            yOffset += labelPad;
+            ctx.drawImage(layout.img, sidePad, yOffset, layout.w, layout.h);
+            yOffset += layout.h + gap;
           });
 
           document.getElementById("mergedPreview").style.display = "block";
