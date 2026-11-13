@@ -2,6 +2,11 @@
 
 Update this file **and** the badge in `index.html` (`APP_VERSION` + `#appVersion`) on every deploy.
 
+## v1.3.1 — 2026-11-13
+
+- Treat **Reliance**, **Jio**, **Jio-bp**, and **Reliance bp Mobility** as the same petrol bunk (`Reliance` / Jio-bp in the dropdown).
+- AI prompt + form normalization map those aliases to `Reliance`.
+
 ## v1.3.0 — 2026-11-13
 
 - Added **Retry AI extraction** on the review form to re-POST the current images to `/api/ocr` and refresh fields when the first read is wrong.
