@@ -2,6 +2,10 @@
 
 Update this file **and** the badge in `index.html` (`APP_VERSION` + `#appVersion`) on every deploy.
 
+## v1.3.0 — 2026-11-13
+
+- Added **Retry AI extraction** on the review form to re-POST the current images to `/api/ocr` and refresh fields when the first read is wrong.
+
 ## v1.2.0 — 2026-11-13
 
 - Merged collage layout set back to **horizontal** (side-by-side images).
