@@ -434,7 +434,7 @@
         <p style="color: #666; font-size: 14px; margin-bottom: 20px">
           Upload receipt, bike odometer, and pump display. Add an optional
           density-board photo when density is not on the pump. AI extracts the
-          data; the final collage stacks images vertically.
+          data; the final collage places images side by side.
         </p>
 
         <div class="upload-grid">
@@ -692,7 +692,7 @@
           </div>
 
           <div class="merged-preview" id="mergedPreview" style="display: none">
-            <h3>Merged Image (Vertical Stack - WebP)</h3>
+            <h3>Merged Image (Horizontal Layout - WebP)</h3>
             <canvas id="mergedCanvas"></canvas>
             <br />
             <button
@@ -1100,14 +1100,14 @@ VALIDATION:
         const canvas = document.getElementById("mergedCanvas");
         const ctx = canvas.getContext("2d");
 
-        // Vertical stack: Receipt → Bike → Pump → optional Density Board
+        // Horizontal row: Receipt → Bike → Pump → optional Density Board
         const slots = [
-          { src: uploadedImages.receipt, label: "1. Receipt" },
-          { src: uploadedImages.odometer, label: "2. Bike Odometer" },
-          { src: uploadedImages.pump, label: "3. Pump Display" },
+          { src: uploadedImages.receipt, label: "Receipt" },
+          { src: uploadedImages.odometer, label: "Bike Odometer" },
+          { src: uploadedImages.pump, label: "Pump Display" },
         ];
         if (uploadedImages.density) {
-          slots.push({ src: uploadedImages.density, label: "4. Density Board" });
+          slots.push({ src: uploadedImages.density, label: "Density Board" });
         }
 
         const images = slots.map((slot) => {
@@ -1125,26 +1125,23 @@ VALIDATION:
               }),
           ),
         ).then(() => {
-          const targetWidth = 900;
-          const labelPad = 42;
-          const gap = 16;
-          const sidePad = 16;
+          const targetHeight = 700;
+          const labelPad = 50;
+          const gap = 20;
 
           const layouts = images.map((img) => {
-            const scale = (targetWidth - sidePad * 2) / img.width;
+            const scale = targetHeight / img.height;
             return {
               img,
-              w: targetWidth - sidePad * 2,
-              h: Math.round(img.height * scale),
+              w: Math.round(img.width * scale),
+              h: targetHeight,
             };
           });
 
-          const originalWidth = targetWidth;
-          const originalHeight =
-            layouts.reduce((sum, item) => sum + item.h, 0) +
-            slots.length * labelPad +
-            (slots.length - 1) * gap +
-            sidePad;
+          const originalWidth =
+            layouts.reduce((sum, item) => sum + item.w, 0) +
+            (layouts.length - 1) * gap;
+          const originalHeight = targetHeight + labelPad;
 
           canvas.width = originalWidth;
           canvas.height = originalHeight;
@@ -1162,15 +1159,13 @@ VALIDATION:
           ctx.fillStyle = "white";
           ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-          let yOffset = sidePad;
+          let xOffset = 0;
           layouts.forEach((layout, index) => {
             ctx.fillStyle = "#667eea";
-            ctx.font = "bold 22px Arial";
-            ctx.fillText(slots[index].label, sidePad, yOffset + 28);
-
-            yOffset += labelPad;
-            ctx.drawImage(layout.img, sidePad, yOffset, layout.w, layout.h);
-            yOffset += layout.h + gap;
+            ctx.font = "bold 20px Arial";
+            ctx.fillText(slots[index].label, xOffset + 10, 30);
+            ctx.drawImage(layout.img, xOffset, labelPad, layout.w, layout.h);
+            xOffset += layout.w + gap;
           });
 
           document.getElementById("mergedPreview").style.display = "block";
