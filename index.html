@@ -411,6 +411,24 @@
           grid-template-columns: 1fr;
         }
       }
+
+      /* Bump APP_VERSION + version.md on every deploy */
+      .app-version {
+        position: fixed;
+        right: 14px;
+        bottom: 12px;
+        z-index: 50;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        color: rgba(255, 255, 255, 0.9);
+        background: rgba(0, 0, 0, 0.35);
+        padding: 6px 10px;
+        border-radius: 999px;
+        backdrop-filter: blur(4px);
+        user-select: none;
+        pointer-events: none;
+      }
     </style>
   </head>
   <body>
@@ -719,13 +737,20 @@
       </div>
     </div>
 
+    <!-- Keep in sync with APP_VERSION below and upload/version.md -->
+    <div class="app-version" id="appVersion">v1.2.0</div>
+
     <script>
       // Configuration - secrets now live in Cloudflare environment variables.
       // The browser calls our own /api/* proxies, which add the secret keys
       // server-side before forwarding to Google Apps Script / OpenRouter.
+      // On every deploy: bump APP_VERSION here, the badge text above, and version.md
+      const APP_VERSION = "1.2.0";
       const SCRIPT_URL = "/api/sheet";
       const OPENROUTER_PROXY_URL = "/api/ocr";
       const LLM_MODEL = "google/gemini-2.5-flash";
+
+      document.getElementById("appVersion").textContent = "v" + APP_VERSION;
 
       let uploadedImages = {
         receipt: null,
